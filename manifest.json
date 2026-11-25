@@ -1,0 +1,21 @@
+{
+  "name": "Mar3y Poultry Farm",
+  "short_name": "Mar3y Farm",
+  "description": "نظام إدارة مزرعة الدواجن والحسابات والشراكة",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#064e3b",
+  "theme_color": "#064e3b",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
