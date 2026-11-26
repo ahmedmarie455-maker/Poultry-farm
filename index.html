@@ -279,7 +279,7 @@
       const el = document.createElement('div');
       el.className = `px-4 py-3 rounded-xl border shadow-xl text-xs font-bold flex items-center gap-2 fade-in ${colors[type] || colors.info}`;
       el.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'check-circle'}" class="w-4 h-4 flex-shrink-0"></i><span>${esc(msg)}</span>`;
-      c.appendChild(el); lucide.createIcons();
+      c.appendChild(el); (window.lucide && lucide.createIcons());
       setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 250); }, 3000);
     }
 
@@ -325,8 +325,7 @@
     function exportCSV(filename, headers, rows) {
       const bom = '﻿';
       const lines = [headers.join(','), ...rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(','))];
-      const blob = new Blob([bom + lines.join('
-')], { type: 'text/csv;charset=utf-8;' });
+      const blob = new Blob([bom + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = `${filename}_${todayISO()}.csv`;
@@ -698,7 +697,7 @@
     function applyTheme() {
       document.documentElement.classList.toggle('dark', !!state.settings.darkMode);
       const ic = document.getElementById('theme-icon'); if (ic) ic.setAttribute('data-lucide', state.settings.darkMode ? 'sun' : 'moon');
-      lucide.createIcons();
+      (window.lucide && lucide.createIcons());
     }
     function toggleDarkMode() { state.settings.darkMode = !state.settings.darkMode; applyTheme(); saveState(true); }
     function toggleSidebar(show) {
@@ -719,7 +718,7 @@
           html += `<button onclick="navigate('${s.id}')" data-nav="${s.id}" class="nav-link w-full flex items-center gap-3 px-3 py-2 rounded-xl font-bold transition text-right ${active}"><i data-lucide="${s.icon}" class="w-4 h-4 flex-shrink-0"></i><span class="truncate">${esc(s.label)}</span></button>`;
         });
       });
-      nav.innerHTML = html; lucide.createIcons();
+      nav.innerHTML = html; (window.lucide && lucide.createIcons());
     }
     function navigate(secId) {
       if (!(currentUser.permissions.sections || []).includes(secId)) return showToast('ليس لديك صلاحية لهذا القسم', 'warning');
@@ -736,7 +735,7 @@
       document.getElementById('modal-title').textContent = title;
       document.getElementById('modal-body').innerHTML = bodyHtml;
       document.getElementById('modal-overlay').classList.remove('hidden');
-      lucide.createIcons();
+      (window.lucide && lucide.createIcons());
     }
     function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); }
 
@@ -792,7 +791,7 @@
         settings: renderSettings
       };
       (map[currentSection] || renderDashboard)(c);
-      lucide.createIcons();
+      (window.lucide && lucide.createIcons());
     }
 
     // 1. لوحة التحكم
@@ -816,7 +815,7 @@
       container.innerHTML = `
         <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap items-center gap-1.5">
-            ${[['all','الكل'],['daily','يومي'],['weekly','أسبوعي'],['monthly','شهري'],['yearly','سنوي']].map(([k,l]) => `<button onclick="dashPeriod='${k}';renderDashboard(document.getElementById('app-content'));lucide.createIcons();" class="px-3 py-1.5 rounded-xl text-xs font-bold ${dashPeriod===k?'bg-brand-600 text-white':'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}">${l}</button>`).join('')}
+            ${[['all','الكل'],['daily','يومي'],['weekly','أسبوعي'],['monthly','شهري'],['yearly','سنوي']].map(([k,l]) => `<button onclick="dashPeriod='${k}';renderDashboard(document.getElementById('app-content'));(window.lucide && lucide.createIcons());" class="px-3 py-1.5 rounded-xl text-xs font-bold ${dashPeriod===k?'bg-brand-600 text-white':'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}">${l}</button>`).join('')}
           </div>
           ${can('add') ? `<div class="flex flex-wrap gap-2 no-print">
             <button onclick="openDailyLogModal('${activeCycle?.id||''}')" class="px-3 py-1.5 rounded-xl bg-brand-600 text-white text-xs font-bold">+ يومية عنبر</button>
@@ -870,7 +869,7 @@
       container.innerHTML = `
         <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-3 no-print">
           <div class="flex flex-wrap items-center gap-2">
-            ${state.cycles.map(x => `<button onclick="selectedCycleId='${x.id}';renderCycles(document.getElementById('app-content'));lucide.createIcons();" class="px-3 py-1.5 rounded-xl text-xs font-bold ${c?.id===x.id?'bg-brand-600 text-white':'bg-slate-100 dark:bg-slate-800'}">${esc(x.name)} (${esc(x.status)}${x.locked?' • مقفلة':''})</button>`).join('')}
+            ${state.cycles.map(x => `<button onclick="selectedCycleId='${x.id}';renderCycles(document.getElementById('app-content'));(window.lucide && lucide.createIcons());" class="px-3 py-1.5 rounded-xl text-xs font-bold ${c?.id===x.id?'bg-brand-600 text-white':'bg-slate-100 dark:bg-slate-800'}">${esc(x.name)} (${esc(x.status)}${x.locked?' • مقفلة':''})</button>`).join('')}
           </div>
           ${can('add') ? `<button onclick="openCycleModal()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-bold">+ دورة جديدة</button>` : ''}
         </div>
@@ -963,20 +962,20 @@
         selectedCycleId = id;
         logAudit('دورة جديدة', data.name);
       }
-      saveState(); closeModal(); renderCycles(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حفظ بيانات الدورة');
+      saveState(); closeModal(); renderCycles(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حفظ بيانات الدورة');
     }
     function toggleVaccine(cId, idx) { const c = state.cycles.find(x => x.id === cId); if (c?.vaccines?.[idx] && !c.locked) { c.vaccines[idx].done = !c.vaccines[idx].done; saveState(); } }
     function addVaccine(cId) {
       const name = prompt('اسم التحصين:'); if (!name) return;
       const day = Number(prompt('اليوم في الدورة (مثال 14):', '14') || 14);
-      const c = state.cycles.find(x => x.id === cId); if (c) { c.vaccines = c.vaccines || []; c.vaccines.push({ name: name.trim(), day, done: false }); saveState(); renderCycles(document.getElementById('app-content')); lucide.createIcons(); }
+      const c = state.cycles.find(x => x.id === cId); if (c) { c.vaccines = c.vaccines || []; c.vaccines.push({ name: name.trim(), day, done: false }); saveState(); renderCycles(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); }
     }
     function toggleChecklist(cId, idx) { const c = state.cycles.find(x => x.id === cId); if (c?.checklist?.[idx] && !c.locked) { c.checklist[idx].done = !c.checklist[idx].done; saveState(); } }
     function lockCycle(cId) {
       const c = state.cycles.find(x => x.id === cId); if (!c) return;
       if (!requireManagerPin('قفل الدورة نهائياً')) return;
       c.status = 'مغلقة'; c.locked = true;
-      logAudit('قفل دورة', c.name); saveState(); renderCycles(document.getElementById('app-content')); lucide.createIcons(); showToast('تم قفل الدورة بنجاح');
+      logAudit('قفل دورة', c.name); saveState(); renderCycles(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم قفل الدورة بنجاح');
     }
 
     function copyWhatsAppSummary(cId) {
@@ -1054,7 +1053,7 @@
         c.logs.unshift({ id: 'LOG-'+Date.now(), date, mortality, feedKg, waterLiters, avgWeightG, tempC, humidityPct, feedItemId, medicine });
         logAudit('يومية عنبر', `${c.name}: نافق ${mortality}، علف ${feedKg} كجم`);
       }
-      saveState(); closeModal(); renderCycles(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حفظ اليومية وتحديث المخزون');
+      saveState(); closeModal(); renderCycles(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حفظ اليومية وتحديث المخزون');
     }
     function deleteDailyLog(cycleId, logId) {
       if (!requireManagerPin('حذف اليومية')) return;
@@ -1065,7 +1064,7 @@
         if (it) it.qty = Number(it.qty||0) + Number(l.feedKg||0);
       }
       c.logs = c.logs.filter(x => x.id !== logId);
-      logAudit('حذف يومية', `${c.name}`); saveState(); renderCycles(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حذف اليومية وإرجاع العلف للمخزن');
+      logAudit('حذف يومية', `${c.name}`); saveState(); renderCycles(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حذف اليومية وإرجاع العلف للمخزن');
     }
 
     // 3. مقارنة الدورات Benchmark
@@ -1177,19 +1176,19 @@
         state.partners.push({ id: 'PRT-'+Date.now(), name, phone, manualPct });
         logAudit('إضافة شريك', name);
       }
-      saveState(); closeModal(); renderPartners(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حفظ بيانات الشريك وتحديث النسب');
+      saveState(); closeModal(); renderPartners(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حفظ بيانات الشريك وتحديث النسب');
     }
     function deletePartner(id) {
       if (!requireManagerPin('حذف الشريك')) return;
       state.partners = state.partners.filter(p => p.id !== id);
-      saveState(); renderPartners(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حذف الشريك');
+      saveState(); renderPartners(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حذف الشريك');
     }
     function deletePartnerTx(id) {
       if (!requireManagerPin('حذف حركة الشريك')) return;
       state.treasuryTx = state.treasuryTx.filter(x => x.ref !== id);
       state.bankTx = state.bankTx.filter(x => x.ref !== id);
       state.partnerTx = state.partnerTx.filter(x => x.id !== id);
-      saveState(); renderPartners(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حذف الحركة وعكس أثرها');
+      saveState(); renderPartners(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حذف الحركة وعكس أثرها');
     }
 
     function openPartnerTxModal() {
@@ -1237,7 +1236,7 @@
         if (method === 'خزنة') state.treasuryTx.unshift({ id: 'TTX-'+Date.now(), date, treasuryId: accId, type: 'صرف', amount, party: prt?.name, ref: id, notes: 'مسحوبات شريك' });
         else state.bankTx.unshift({ id: 'BTX-'+Date.now(), date, bankId: accId, type: 'سحب', amount, party: prt?.name, ref: id, notes: 'مسحوبات شريك' });
       }
-      logAudit('حركة شريك', `${prt?.name} - ${type}: ${fmtMoney(amount)}`); saveState(); closeModal(); renderPartners(document.getElementById('app-content')); lucide.createIcons(); showToast('تم تسجيل حركة الشريك وإعادة حساب النسب');
+      logAudit('حركة شريك', `${prt?.name} - ${type}: ${fmtMoney(amount)}`); saveState(); closeModal(); renderPartners(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم تسجيل حركة الشريك وإعادة حساب النسب');
     }
 
     // 5. المخازن وحركات الجرد والهالك
@@ -1269,11 +1268,11 @@
     function saveItem(e) {
       e.preventDefault();
       state.items.push({ id: 'ITM-'+Date.now(), code: 'ITM-'+(state.items.length+1), name: document.getElementById('it-name').value.trim(), category: document.getElementById('it-cat').value, unit: document.getElementById('it-unit').value, qty: Number(document.getElementById('it-qty').value||0), unitCost: Number(document.getElementById('it-cost').value||0), minQty: Number(document.getElementById('it-min').value||0), warehouseId: 'WH-1' });
-      saveState(); closeModal(); renderWarehouses(document.getElementById('app-content')); lucide.createIcons(); showToast('تم إضافة الصنف');
+      saveState(); closeModal(); renderWarehouses(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم إضافة الصنف');
     }
     function deleteItem(id) {
       if (!requireManagerPin('حذف الصنف')) return;
-      state.items = state.items.filter(x => x.id !== id); saveState(); renderWarehouses(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حذف الصنف');
+      state.items = state.items.filter(x => x.id !== id); saveState(); renderWarehouses(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حذف الصنف');
     }
     function openStockAdjustModal() {
       if (!state.items.length) return showToast('أضف أصنافاً للمخزن أولاً', 'warning');
@@ -1292,7 +1291,7 @@
       if (type.includes('إضافة')) it.qty = Number(it.qty||0) + qty;
       else it.qty = Math.max(0, Number(it.qty||0) - qty);
       state.stockTx.unshift({ id: 'STX-'+Date.now(), date: todayISO(), itemId, type, qty, notes });
-      logAudit('حركة مخزن', `${it.name}: ${type} (${qty})`); saveState(); closeModal(); renderWarehouses(document.getElementById('app-content')); lucide.createIcons(); showToast('تم تحديث رصيد المخزن');
+      logAudit('حركة مخزن', `${it.name}: ${type} (${qty})`); saveState(); closeModal(); renderWarehouses(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم تحديث رصيد المخزن');
     }
 
     // 6. المشتريات والمبيعات (مع إمكانية الحذف وعكس الأثر المالي والمخزني)
@@ -1314,7 +1313,7 @@
       state.treasuryTx = state.treasuryTx.filter(x => x.ref !== id);
       state.bankTx = state.bankTx.filter(x => x.ref !== id);
       state.purchases = state.purchases.filter(x => x.id !== id);
-      logAudit('حذف فاتورة شراء', id); saveState(); renderPurchases(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حذف الفاتورة وعكس أثرها');
+      logAudit('حذف فاتورة شراء', id); saveState(); renderPurchases(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حذف الفاتورة وعكس أثرها');
     }
     function viewPhotoModal(src) { openModal('صورة الوصل / الفاتورة', `<img src="${src}" class="max-h-[70vh] mx-auto rounded-xl" />`); }
 
@@ -1351,7 +1350,7 @@
       }
       state.purchases.unshift({ id, date, supplierId, cycleId, category, itemId, qty, unitPrice, total, paid, remaining, paymentMethod, partnerId, receiptPhoto });
       state.settings.nextPurchaseNum = (state.settings.nextPurchaseNum || 1001) + 1;
-      saveState(); closeModal(); renderPurchases(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حفظ فاتورة الشراء وتحديث الأرصدة');
+      saveState(); closeModal(); renderPurchases(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حفظ فاتورة الشراء وتحديث الأرصدة');
     }
 
     function renderSales(container) {
@@ -1370,7 +1369,7 @@
       state.treasuryTx = state.treasuryTx.filter(x => x.ref !== id);
       state.bankTx = state.bankTx.filter(x => x.ref !== id);
       state.sales = state.sales.filter(x => x.id !== id);
-      logAudit('حذف فاتورة بيع', id); saveState(); renderSales(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حذف فاتورة البيع وعكس أثرها');
+      logAudit('حذف فاتورة بيع', id); saveState(); renderSales(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حذف فاتورة البيع وعكس أثرها');
     }
     function openSaleModal() {
       const id = 'SAL-' + (state.settings.nextSaleNum || 2001);
@@ -1400,7 +1399,7 @@
       }
       state.sales.unshift({ id, date, customerId, cycleId, saleType, birdsCount, weightKg, unitPrice, total, paid, remaining, paymentMethod });
       state.settings.nextSaleNum = (state.settings.nextSaleNum || 2001) + 1;
-      saveState(); closeModal(); renderSales(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حفظ فاتورة البيع');
+      saveState(); closeModal(); renderSales(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حفظ فاتورة البيع');
     }
 
     // 7. الموردون والعملاء + سداد وتحصيل دفعات + كشف حساب
@@ -1493,7 +1492,7 @@
       state.treasuryTx = state.treasuryTx.filter(x => x.ref !== id);
       state.bankTx = state.bankTx.filter(x => x.ref !== id);
       state.expenses = state.expenses.filter(x => x.id !== id);
-      logAudit('حذف مصروف', id); saveState(); renderExpenses(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حذف المصروف وعكس أثره');
+      logAudit('حذف مصروف', id); saveState(); renderExpenses(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حذف المصروف وعكس أثره');
     }
     function openExpenseModal() {
       window.__tmpReceipt = '';
@@ -1517,7 +1516,7 @@
       if (paymentMethod === 'خزنة' && state.treasuries[0]) state.treasuryTx.unshift({ id: 'TTX-'+Date.now(), date, treasuryId: state.treasuries[0].id, type: 'صرف', amount, party: category, ref: id, notes: description });
       else if (paymentMethod === 'بنك' && state.banks[0]) state.bankTx.unshift({ id: 'BTX-'+Date.now(), date, bankId: state.banks[0].id, type: 'سحب', amount, party: category, ref: id, notes: description });
       else if (paymentMethod === 'دفع مباشر من شريك' && partnerId) state.partnerTx.unshift({ id: 'PTX-'+Date.now(), date, partnerId, type: 'دفع مباشر من جيب الشريك', amount, accountMethod: 'مباشر', notes: `مصروف: ${description}` });
-      saveState(); closeModal(); renderExpenses(document.getElementById('app-content')); lucide.createIcons(); showToast('تم تسجيل المصروف');
+      saveState(); closeModal(); renderExpenses(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم تسجيل المصروف');
     }
 
     function renderRevenues(container) {
@@ -1530,7 +1529,7 @@
       e.preventDefault(); const id = 'REV-'+Date.now(), name = document.getElementById('rv-name').value.trim(), amount = Number(document.getElementById('rv-amt').value||0);
       state.revenues.unshift({ id, date: todayISO(), name, amount });
       if (state.treasuries[0]) state.treasuryTx.unshift({ id: 'TTX-'+Date.now(), date: todayISO(), treasuryId: state.treasuries[0].id, type: 'قبض', amount, party: 'إيراد', ref: id, notes: name });
-      saveState(); closeModal(); renderRevenues(document.getElementById('app-content')); lucide.createIcons(); showToast('تم تسجيل الإيراد');
+      saveState(); closeModal(); renderRevenues(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم تسجيل الإيراد');
     }
 
     // 9. الخزنة والبنوك والشيكات (مفعلة بالكامل)
@@ -1558,7 +1557,7 @@
     function saveTreasuryTx(e) {
       e.preventDefault();
       state.treasuryTx.unshift({ id: 'TTX-'+Date.now(), date: todayISO(), treasuryId: document.getElementById('ttx-tr').value, type: document.getElementById('ttx-type').value, amount: Number(document.getElementById('ttx-amt').value||0), party: 'حركة يدوية', notes: document.getElementById('ttx-notes').value.trim() });
-      saveState(); closeModal(); renderTreasury(document.getElementById('app-content')); lucide.createIcons(); showToast('تم تسجيل حركة الخزنة');
+      saveState(); closeModal(); renderTreasury(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم تسجيل حركة الخزنة');
     }
 
     function renderBanks(container) {
@@ -1636,14 +1635,14 @@
       e.preventDefault();
       const obj = { id: 'CHQ-'+Date.now(), no: document.getElementById('chq-no').value.trim(), party: document.getElementById('chq-party').value.trim(), dueDate: document.getElementById('chq-due').value, amount: Number(document.getElementById('chq-amt').value||0), status: 'معلق' };
       if (dir === 'in') state.chequesIn.unshift(obj); else state.chequesOut.unshift(obj);
-      saveState(); closeModal(); renderCheques(document.getElementById('app-content')); lucide.createIcons(); showToast('تم تسجيل الشيك');
+      saveState(); closeModal(); renderCheques(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم تسجيل الشيك');
     }
     function clearCheque(dir, id) {
       const arr = dir === 'in' ? state.chequesIn : state.chequesOut;
       const c = arr.find(x => x.id === id); if (!c) return;
       c.status = dir === 'in' ? 'تم تحصيله' : 'تم صرفه';
       if (state.banks[0]) state.bankTx.unshift({ id: 'BTX-'+Date.now(), date: todayISO(), bankId: state.banks[0].id, type: dir==='in'?'إيداع':'سحب', amount: c.amount, party: c.party, ref: c.no, notes: `شيك رقم ${c.no}` });
-      saveState(); renderCheques(document.getElementById('app-content')); lucide.createIcons(); showToast('تم تحديث حالة الشيك وحساب البنك');
+      saveState(); renderCheques(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم تحديث حالة الشيك وحساب البنك');
     }
 
     // 10. الموظفون والعمالة اليومية (مفعلة بالكامل: إضافة/تعديل/سلفة/صرف راتب/عمالة يومية)
@@ -1715,11 +1714,11 @@
       } else {
         state.employees.push({ id: 'EMP-'+Date.now(), name, job, salary, advance: 0, deduction: 0, bonus: 0 });
       }
-      logAudit('بيانات موظف', name); saveState(); closeModal(); renderHR(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حفظ بيانات الموظف');
+      logAudit('بيانات موظف', name); saveState(); closeModal(); renderHR(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حفظ بيانات الموظف');
     }
     function deleteEmployee(id) {
       if (!requireManagerPin('حذف الموظف')) return;
-      state.employees = state.employees.filter(x => x.id !== id); saveState(); renderHR(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حذف الموظف');
+      state.employees = state.employees.filter(x => x.id !== id); saveState(); renderHR(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حذف الموظف');
     }
     function openEmpAdjustModal(empId) {
       const emp = state.employees.find(x => x.id === empId); if (!emp) return;
@@ -1737,7 +1736,7 @@
       if (type === 'advance' && state.treasuries[0]) {
         state.treasuryTx.unshift({ id: 'TTX-'+Date.now(), date: todayISO(), treasuryId: state.treasuries[0].id, type: 'صرف', amount: amt, party: emp.name, notes: `سلفة موظف: ${emp.name}` });
       }
-      logAudit('حركة موظف', `${emp.name}: ${type} (${fmtMoney(amt)})`); saveState(); closeModal(); renderHR(document.getElementById('app-content')); lucide.createIcons(); showToast('تم تسجيل الحركة');
+      logAudit('حركة موظف', `${emp.name}: ${type} (${fmtMoney(amt)})`); saveState(); closeModal(); renderHR(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم تسجيل الحركة');
     }
     function payEmployeeSalary(empId) {
       const emp = state.employees.find(x => x.id === empId); if (!emp) return;
@@ -1748,7 +1747,7 @@
       state.expenses.unshift({ id: expId, date: todayISO(), cycleId: state.cycles.find(c=>c.status==='نشطة')?.id || '', category: 'رواتب وعمالة', description: `راتب شهر: ${emp.name}`, amount: net, isCapex: false, paymentMethod: 'خزنة' });
       if (state.treasuries[0]) state.treasuryTx.unshift({ id: 'TTX-'+Date.now(), date: todayISO(), treasuryId: state.treasuries[0].id, type: 'صرف', amount: net, party: emp.name, ref: expId, notes: `صرف راتب ${emp.name}` });
       emp.advance = 0; emp.bonus = 0; emp.deduction = 0;
-      logAudit('صرف راتب', `${emp.name}: ${fmtMoney(net)}`); saveState(); renderHR(document.getElementById('app-content')); lucide.createIcons(); showToast('تم صرف الراتب وتصفير السلف والمكافآت');
+      logAudit('صرف راتب', `${emp.name}: ${fmtMoney(net)}`); saveState(); renderHR(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم صرف الراتب وتصفير السلف والمكافآت');
     }
 
     function openDailyLaborModal() {
@@ -1770,13 +1769,13 @@
       if (document.getElementById('dlb-cash').checked && state.treasuries[0]) {
         state.treasuryTx.unshift({ id: 'TTX-'+Date.now(), date, treasuryId: state.treasuries[0].id, type: 'صرف', amount: total, party: workerName, ref: id, notes: `عمالة يومية: ${workType}` });
       }
-      logAudit('عمالة يومية', `${workerName} (${workType}): ${fmtMoney(total)}`); saveState(); closeModal(); renderHR(document.getElementById('app-content')); lucide.createIcons(); showToast('تم تسجيل العمالة اليومية');
+      logAudit('عمالة يومية', `${workerName} (${workType}): ${fmtMoney(total)}`); saveState(); closeModal(); renderHR(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم تسجيل العمالة اليومية');
     }
     function deleteDailyLabor(id) {
       if (!requireManagerPin('حذف يومية العمالة')) return;
       state.treasuryTx = state.treasuryTx.filter(x => x.ref !== id);
       state.dailyLabor = state.dailyLabor.filter(x => x.id !== id);
-      saveState(); renderHR(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حذف يومية العمالة');
+      saveState(); renderHR(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حذف يومية العمالة');
     }
 
     // 11. الحسابات المبسطة
@@ -1865,7 +1864,7 @@
 
       container.innerHTML = `
         <div class="bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 flex flex-wrap gap-1.5 no-print">
-          ${REPORT_TABS.map(tb => `<button onclick="activeReportTab='${tb.id}';renderReports(document.getElementById('app-content'));lucide.createIcons();" class="px-3 py-1.5 rounded-xl text-xs font-bold ${activeReportTab===tb.id?'bg-brand-600 text-white':'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}">${tb.label}</button>`).join('')}
+          ${REPORT_TABS.map(tb => `<button onclick="activeReportTab='${tb.id}';renderReports(document.getElementById('app-content'));(window.lucide && lucide.createIcons());" class="px-3 py-1.5 rounded-xl text-xs font-bold ${activeReportTab===tb.id?'bg-brand-600 text-white':'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'}">${tb.label}</button>`).join('')}
         </div>
 
         <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 flex flex-wrap justify-between items-center gap-3">
@@ -1994,14 +1993,14 @@
         state.users.push({ id: 'USR-'+Date.now(), name, username, password, role, active, permissions });
         logAudit('إضافة مستخدم', `${name} (${role})`);
       }
-      saveState(); closeModal(); renderUsers(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حفظ المستخدم وصلاحياته بنجاح');
+      saveState(); closeModal(); renderUsers(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حفظ المستخدم وصلاحياته بنجاح');
     }
 
     function deleteUser(id) {
       if (id === 'USR-1') return showToast('لا يمكن حذف المدير الرئيسي', 'error');
       if (!requireManagerPin('حذف المستخدم')) return;
       state.users = state.users.filter(u => u.id !== id);
-      saveState(); renderUsers(document.getElementById('app-content')); lucide.createIcons(); showToast('تم حذف المستخدم');
+      saveState(); renderUsers(document.getElementById('app-content')); (window.lucide && lucide.createIcons()); showToast('تم حذف المستخدم');
     }
 
     // 14. الإعدادات والنسخ السحابي وسجل العمليات وتغيير PIN
@@ -2090,7 +2089,7 @@ function doGet(e) {
       state = createEmptyDatabase(); saveState(); renderCurrentSection(); showToast('تم تصفير البيانات بنجاح');
     }
 
-    initDatabase().then(() => { renderQuickUsers(); lucide.createIcons(); });
+    initDatabase().then(() => { renderQuickUsers(); (window.lucide && lucide.createIcons()); });
   </script>
 </body>
 </html>

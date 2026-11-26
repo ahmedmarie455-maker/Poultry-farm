@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mar3y-poultry-farm-v2-1';
+const CACHE_NAME = 'mar3y-poultry-farm-v2-2';
 const ASSETS = ['./', './index.html', './manifest.json', './logo.jpg'];
 
 self.addEventListener('install', event => {
