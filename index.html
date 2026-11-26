@@ -536,6 +536,7 @@
       if (parsed && typeof parsed === 'object') {
         const base = createEmptyDatabase();
         state = { ...base, ...parsed, settings: { ...base.settings, ...(parsed.settings || {}) } };
+        if (!Array.isArray(state.users) || !state.users.length) state.users = base.users;
         saveState(true); return;
       }
       state = createDemoDatabase();
@@ -672,8 +673,9 @@
       const box = document.getElementById('quick-users-hint'); if (!box || !state) return;
       box.innerHTML = state.users.filter(u => u.active).map(u => `<button type="button" onclick="document.getElementById('login-username').value='${esc(u.username)}';document.getElementById('login-password').value='${esc(u.password)}';" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-brand-100 text-slate-700 text-[11px] font-bold">${esc(u.username)} (${esc(u.role)})</button>`).join('');
     }
-    function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
+      if (!state) await initDatabase();
       const u = document.getElementById('login-username').value.trim(), p = document.getElementById('login-password').value;
       const found = state.users.find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p && x.active);
       if (!found) { const er = document.getElementById('login-error'); er.textContent = 'بيانات الدخول غير صحيحة أو الحساب موقوف'; er.classList.remove('hidden'); return; }
@@ -868,7 +870,7 @@
       container.innerHTML = `
         <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-3 no-print">
           <div class="flex flex-wrap items-center gap-2">
-            ${state.cycles.map(x => `<button onclick="selectedCycleId='${{x.id}}';renderCycles(document.getElementById('app-content'));lucide.createIcons();" class="px-3 py-1.5 rounded-xl text-xs font-bold ${{c?.id===x.id?'bg-brand-600 text-white':'bg-slate-100 dark:bg-slate-800'}}">${{esc(x.name)}} (${{esc(x.status)}}${{x.locked?' • مقفلة':''}})</button>`).join('')}
+            ${state.cycles.map(x => `<button onclick="selectedCycleId='${x.id}';renderCycles(document.getElementById('app-content'));lucide.createIcons();" class="px-3 py-1.5 rounded-xl text-xs font-bold ${c?.id===x.id?'bg-brand-600 text-white':'bg-slate-100 dark:bg-slate-800'}">${esc(x.name)} (${esc(x.status)}${x.locked?' • مقفلة':''})</button>`).join('')}
           </div>
           ${can('add') ? `<button onclick="openCycleModal()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-bold">+ دورة جديدة</button>` : ''}
         </div>
